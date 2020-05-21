@@ -27,10 +27,12 @@ KMeans::KMeans(const std::string& data_path, const int& cluster_count)
 	Sample sample;
 	double value;
 	const int column_count = 7;//有效数据列数，最后一列不要
+	_samples_data.resize(column_count);
 	while (!file.eof()) {
 		for (int index = 0; index < column_count; ++index) {
 			file >> value;
 			sample.data.push_back(value);
+			_samples_data.at(index).push_back(value);
 		}
 		file >> value;
 		sample.type = (int)value;
