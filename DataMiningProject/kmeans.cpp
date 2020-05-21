@@ -44,7 +44,7 @@ KMeans::KMeans(const std::string& data_path, const int& cluster_count)
 	file.close();
 }
 
-void KMeans::begin_clustering(const double& delta)
+int KMeans::begin_clustering(const double& delta)
 {
 	vector<size_t> initial_centers_index = get_initial_centers_index();
 	vector<Sample> post_center;
@@ -52,6 +52,7 @@ void KMeans::begin_clustering(const double& delta)
 		post_center.push_back(_samples.at(index));
 	vector<double> distance(_cluster_count, 0);
 	vector<Sample> prev_center;
+	int count = 1;
 	do {
 		for (Sample& s : _samples) {
 			int center_index = 0;
@@ -65,7 +66,9 @@ void KMeans::begin_clustering(const double& delta)
 		}
 		prev_center = post_center;
 		post_center = get_center();
+		count++;
 	} while (!is_finished(prev_center, post_center, delta));
+	return count;
 }
 
 vector<vector<size_t>> KMeans::get_result() const
@@ -146,36 +149,38 @@ double KMeans::get_euclidian_distance(const Sample& lhs, const Sample& rhs) cons
 			result += (*lhs_it - *rhs_it) * (*lhs_it - *rhs_it);
 		}
 	}
-	return result;
+	return sqrt(result);
 }
 
 vector<Sample> KMeans::get_center() const
 {
 	 vector<Sample> result(_cluster_count);
-	 size_t column_count = _samples.at(0).data.size();
-	 int index = 1;
-	 for (Sample& s : result) {//type类型值用来存储有多少个点以该聚类中心为最近中心
-		 s.data.resize(column_count);
-		 for (double& v : s.data)
-			 v = 0.0;
-		 s.cluster_index = index++;
-	 }
-	 for (const Sample& sample : _samples) {//根据sample的cluster_index值，将数据累加到result相应位置
-		 for (size_t i = 0; i < column_count; ++i) {
-			 result[sample.cluster_index - 1].data[i] += sample.data[i];
+	 if (_samples.size() > 0) {
+		 size_t column_count = _samples.at(0).data.size();
+		 int index = 1;
+		 for (Sample& s : result) {//type类型值用来存储有多少个点以该聚类中心为最近中心
+			 s.data.resize(column_count);
+			 for (double& v : s.data)
+				 v = 0.0;
+			 s.cluster_index = index++;
 		 }
-		 ++result[sample.cluster_index - 1].type;
-	 }
-	 for (Sample& s : result) {//取平均值作为中心
-		 for (double& value : s.data) {
-			 value = value / s.type;
+		 for (const Sample& sample : _samples) {//根据sample的cluster_index值，将数据累加到result相应位置
+			 for (size_t i = 0; i < column_count; ++i) {
+				 result[sample.cluster_index - 1].data[i] += sample.data[i];
+			 }
+			 ++result[sample.cluster_index - 1].type;
 		 }
-		 s.type = 0;//清空type值
+		 for (Sample& s : result) {//取平均值作为中心
+			 for (double& value : s.data) {
+				 value = value / s.type;
+			 }
+			 s.type = 0;//清空type值
+		 }
 	 }
 	 return result;
 }
 
-bool KMeans::is_finished(vector<Sample> prev, vector<Sample> post, const double& delta) const
+bool KMeans::is_finished(const vector<Sample>& prev, const vector<Sample>& post, const double& delta) const
 {
 	bool result = true;
 	if (prev.size() == post.size() && prev.size() > 0) {

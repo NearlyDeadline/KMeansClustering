@@ -11,9 +11,10 @@ int main()
 {
     KMeans kmeans("seeds_dataset.txt", 3);
     kmeans.min_max_normalize();
-    kmeans.begin_clustering(0.0001);
+    int iterate_count =  kmeans.begin_clustering(0.0001);
     vector<vector<size_t>> result = kmeans.get_result();
     int result_index = 1;
+    cout << "迭代次数：" << iterate_count << "\n";
     for (auto i : result) {
         cout << "C" << result_index << "= { ";
         for (auto j : i)

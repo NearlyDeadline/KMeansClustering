@@ -19,7 +19,7 @@ public:
 	KMeans(const std::string& data_path, const int& cluster_count);
 	//第一个参数为数据路径，第二个参数为想要聚类的簇数
 
-	void begin_clustering(const double& delta);
+	int begin_clustering(const double& delta);
 	//开始聚类，delta为差距最大值，若各个中心变化值小于delta，则视为收敛
 
 	std::vector<std::vector<size_t>> get_result() const;
@@ -43,7 +43,7 @@ private:
 	std::vector<Sample> get_center() const;
 	//迭代计算新的聚类中心，结果为新的聚类中心，数量为_cluster_count
 
-	bool is_finished(std::vector<Sample> prev, std::vector<Sample> post, const double& delta) const;
+	bool is_finished(const std::vector<Sample>& prev, const std::vector<Sample>& post, const double& delta) const;
 	//若新的聚类中心post与旧的中心prev差距小于等于delta，则视为已收敛，停止迭代，否则继续迭代
 
 private:
