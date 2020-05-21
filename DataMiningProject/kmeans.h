@@ -19,6 +19,9 @@ public:
 	KMeans(const std::string& data_path, const int& cluster_count);
 	//第一个参数为数据路径，第二个参数为想要聚类的簇数
 
+	void begin_clustering();
+	//开始聚类
+
 	void print_result() const;
 	//输出聚类结果
 
@@ -26,8 +29,8 @@ private:
 	void min_max_normalize();
 	//对_samples_data进行离差标准化
 
-	std::vector<Sample> get_initial_center() const;
-	//获取初始聚类中心，结果为初始聚类中心，数量为_cluster_count
+	std::vector<size_t> get_initial_center() const;
+	//获取初始聚类中心，结果为初始聚类中心在_samples中的下标，数量为_cluster_count
 
 	size_t get_next_initial_center(const std::vector<double>& distances) const;
 	//根据已有距离数据distance，使用轮盘法获得下一个初始聚类中心的下标

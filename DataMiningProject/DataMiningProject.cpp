@@ -9,6 +9,7 @@ using std::vector;
 int main()
 {
     KMeans kmeans("seeds_dataset.txt", 3);
+    kmeans.begin_clustering();
     return 0;
 }
 

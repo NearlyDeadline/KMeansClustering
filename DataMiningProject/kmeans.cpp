@@ -42,7 +42,12 @@ KMeans::KMeans(const std::string& data_path, const int& cluster_count)
 		sample.data.clear();
 	}
 	file.close();
+}
+
+void KMeans::begin_clustering()
+{
 	min_max_normalize();
+	vector<size_t> centers = get_initial_center();
 }
 
 void KMeans::print_result() const
@@ -51,30 +56,36 @@ void KMeans::print_result() const
 
 void KMeans::min_max_normalize()
 {
+	int index = 0;
+	int column_count = 0;
 	for (vector<double>& data : _samples_data) {
 		double min_value = *std::min_element(data.begin(), data.end());
 		double max_value = *std::max_element(data.begin(), data.end());
-		double ratio = min_value / max_value;//循环不变式外提，不知道编译器会不会自动优化
+		double ratio = max_value - min_value;//循环不变式外提，不知道编译器会不会自动优化
 		for (double& value : data) {
-			value = (value - min_value) / ratio;
+			_samples[index++].data[column_count] = (value - min_value) / ratio;
 		}
+		++column_count;
+		index = 0;
 	}
 }
 
-std::vector<Sample> KMeans::get_initial_center() const
+vector<size_t> KMeans::get_initial_center() const
 {
-	std::vector<Sample> result;
+	vector<size_t> result;
 	int _samples_count = _samples.size();
 	srand((int)time(nullptr));
 	int index = rand() % _samples_count;
-	result.push_back(_samples.at(index));//第一个聚类中心随机选取
-	vector<double> distances(DBL_MAX, _samples_count);//保存每个点与聚类中心的距离
+	result.push_back(index);//第一个聚类中心随机选取
+	vector<double> distances(_samples_count, 10000.0);//保存每个点与聚类中心的距离
 	for (int center_count = 1; center_count < _cluster_count; center_count++) {//剩下的聚类中心优先选择与之前中心最远的点。若有多个中心，则取最近的一个中心
 		for (int point_count = 0; point_count < _samples_count; point_count++) {
-			double distance = std::min(get_euclidian_distance(result.at(center_count), _samples.at(point_count)), distances[point_count]);
+			distances[point_count] = std::min
+			(get_euclidian_distance(_samples.at(result.at(center_count - 1)), _samples.at(point_count)), 
+				distances.at(point_count));
 		}
 		index = get_next_initial_center(distances);
-		result.push_back(_samples.at(index));
+		result.push_back(index);
 	}
 	return result;
 }
@@ -84,9 +95,10 @@ size_t KMeans::get_next_initial_center(const vector<double>& distances) const
 	double sum = 0.0;
 	for (const double& value : distances)
 		sum += value;
-	vector<double> probabilities(0, distances.size());//计算每个点能被选为中心的概率
+	vector<double> probabilities(distances.size(), 0);//计算每个点能被选为中心的概率
+	int index = 0;
 	for (double& value : probabilities) {
-		value = value / sum;
+		value = distances.at(index++) / sum;
 	}
 	double target = rand() / double(RAND_MAX);//0-1随机数
 	sum = 0.0;
@@ -107,13 +119,13 @@ double KMeans::get_euclidian_distance(const Sample& lhs, const Sample& rhs) cons
 	if (lhs.data.size() == rhs.data.size()) {
 		for (vector<double>::const_iterator lhs_it = lhs.data.cbegin(), rhs_it = rhs.data.cbegin();
 			lhs_it != lhs.data.cend(); ++lhs_it, ++rhs_it) {
-			result += pow((*lhs_it) - (*rhs_it), 2);
+			result += (*lhs_it - *rhs_it) * (*lhs_it - *rhs_it);
 		}
 	}
 	return result;
 }
 
-std::vector<Sample> KMeans::get_center() const
+vector<Sample> KMeans::get_center() const
 {
 	 vector<Sample> result(_cluster_count);
 	 size_t column_count = _samples.at(0).data.size();
