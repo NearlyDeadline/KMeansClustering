@@ -44,14 +44,38 @@ KMeans::KMeans(const std::string& data_path, const int& cluster_count)
 	file.close();
 }
 
-void KMeans::begin_clustering()
+void KMeans::begin_clustering(const double& delta)
 {
-	min_max_normalize();
-	vector<size_t> centers = get_initial_center();
+	vector<size_t> initial_centers_index = get_initial_centers_index();
+	vector<Sample> post_center;
+	for (const size_t& index : initial_centers_index)
+		post_center.push_back(_samples.at(index));
+	vector<double> distance(_cluster_count, 0);
+	vector<Sample> prev_center;
+	do {
+		for (Sample& s : _samples) {
+			int center_index = 0;
+			for (double& value : distance) {
+				value = get_euclidian_distance(s, post_center.at(center_index++));
+			}
+			vector<double>::iterator min_iterator = std::min(distance.begin(), distance.end());
+			center_index = 1;
+			for (vector<double>::const_iterator it = distance.cbegin(); it != min_iterator; ++it, ++center_index);
+			s.cluster_index = center_index;
+		}
+		prev_center = post_center;
+		post_center = get_center();
+	} while (!is_finished(prev_center, post_center, delta));
 }
 
-void KMeans::print_result() const
+vector<vector<size_t>> KMeans::get_result() const
 {
+	vector<vector<size_t>> result(_cluster_count, vector<size_t>());
+	size_t sample_count = 1;
+	for (const Sample& s : _samples) {
+		result.at(s.cluster_index - 1).push_back(sample_count++);
+	}
+	return result;
 }
 
 void KMeans::min_max_normalize()
@@ -70,7 +94,7 @@ void KMeans::min_max_normalize()
 	}
 }
 
-vector<size_t> KMeans::get_initial_center() const
+vector<size_t> KMeans::get_initial_centers_index() const
 {
 	vector<size_t> result;
 	int _samples_count = _samples.size();
@@ -84,13 +108,13 @@ vector<size_t> KMeans::get_initial_center() const
 			(get_euclidian_distance(_samples.at(result.at(center_count - 1)), _samples.at(point_count)), 
 				distances.at(point_count));
 		}
-		index = get_next_initial_center(distances);
+		index = get_next_initial_center_index(distances);
 		result.push_back(index);
 	}
 	return result;
 }
 
-size_t KMeans::get_next_initial_center(const vector<double>& distances) const
+size_t KMeans::get_next_initial_center_index(const vector<double>& distances) const
 {
 	double sum = 0.0;
 	for (const double& value : distances)

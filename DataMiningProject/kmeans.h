@@ -19,20 +19,22 @@ public:
 	KMeans(const std::string& data_path, const int& cluster_count);
 	//第一个参数为数据路径，第二个参数为想要聚类的簇数
 
-	void begin_clustering();
-	//开始聚类
+	void begin_clustering(const double& delta);
+	//开始聚类，delta为差距最大值，若各个中心变化值小于delta，则视为收敛
 
-	void print_result() const;
+	std::vector<std::vector<size_t>> get_result() const;
 	//输出聚类结果
 
-private:
 	void min_max_normalize();
 	//对_samples_data进行离差标准化
 
-	std::vector<size_t> get_initial_center() const;
+	std::vector<Sample> get_samples() const { return _samples; }
+
+private:
+	std::vector<size_t> get_initial_centers_index() const;
 	//获取初始聚类中心，结果为初始聚类中心在_samples中的下标，数量为_cluster_count
 
-	size_t get_next_initial_center(const std::vector<double>& distances) const;
+	size_t get_next_initial_center_index(const std::vector<double>& distances) const;
 	//根据已有距离数据distance，使用轮盘法获得下一个初始聚类中心的下标
 
 	double get_euclidian_distance(const Sample& lhs, const Sample& rhs) const;

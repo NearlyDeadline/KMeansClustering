@@ -1,15 +1,26 @@
 ﻿// DataMiningProject.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
 //
 #include "kmeans.h"
+#include <iostream>
 
-using std::string;
 using std::vector;
-
+using std::cout;
+using std::endl;
 
 int main()
 {
     KMeans kmeans("seeds_dataset.txt", 3);
-    kmeans.begin_clustering();
+    kmeans.min_max_normalize();
+    kmeans.begin_clustering(0.0001);
+    vector<vector<size_t>> result = kmeans.get_result();
+    int result_index = 1;
+    for (auto i : result) {
+        cout << "C" << result_index << "= { ";
+        for (auto j : i)
+            cout << j << " ";
+        cout << "}\n{C" << result_index << "} = " << i.size() << endl;
+        ++result_index;
+    }
     return 0;
 }
 
