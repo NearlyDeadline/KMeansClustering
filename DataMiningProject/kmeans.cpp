@@ -58,7 +58,7 @@ void KMeans::begin_clustering(const double& delta)
 			for (double& value : distance) {
 				value = get_euclidian_distance(s, post_center.at(center_index++));
 			}
-			vector<double>::iterator min_iterator = std::min(distance.begin(), distance.end());
+			vector<double>::iterator min_iterator = std::min_element(distance.begin(), distance.end());
 			center_index = 1;
 			for (vector<double>::const_iterator it = distance.cbegin(); it != min_iterator; ++it, ++center_index);
 			s.cluster_index = center_index;
