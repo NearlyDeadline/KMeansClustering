@@ -124,7 +124,7 @@ std::vector<Sample> KMeans::get_center() const
 			 v = 0.0;
 		 s.cluster_index = index++;
 	 }
-	 for (const Sample& sample : _samples) {
+	 for (const Sample& sample : _samples) {//根据sample的cluster_index值，将数据累加到result相应位置
 		 for (size_t i = 0; i < column_count; ++i) {
 			 result[sample.cluster_index - 1].data[i] += sample.data[i];
 		 }
@@ -141,5 +141,19 @@ std::vector<Sample> KMeans::get_center() const
 
 bool KMeans::is_finished(vector<Sample> prev, vector<Sample> post, const double& delta) const
 {
-	return false;
+	bool result = true;
+	if (prev.size() == post.size() && prev.size() > 0) {
+		for (size_t i = 0, point_count = prev.size(); i < point_count; i++) {
+			for (size_t j = 0, column_count = prev.at(0).data.size(); j < column_count; j++) {
+				if (abs((prev.at(i).data.at(j) - post.at(i).data.at(j))) > delta) {
+					result = false;
+					break;
+				}
+			}
+		}
+	}
+	else {
+		result = false;//大小不对，没有进行的必要
+	}
+	return result;
 }
