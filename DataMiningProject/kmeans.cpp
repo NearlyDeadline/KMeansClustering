@@ -1,5 +1,7 @@
 #include "kmeans.h"
 #include <fstream>
+#include <algorithm>
+#include <ctime>
 
 using std::vector;
 using std::string;
@@ -46,18 +48,35 @@ void KMeans::print_result() const
 {
 }
 
-void KMeans::normalize() const
+void KMeans::min_max_normalize()
 {
+	for (vector<double>& data : _samples_data) {
+		double min_value = *std::min_element(data.begin(), data.end());
+		double max_value = *std::max_element(data.begin(), data.end());
+		double ratio = min_value / max_value;//循环不变式外提，不知道编译器会不会自动优化
+		for (double& value : data) {
+			value = (value - min_value) / ratio;
+		}
+	}
 }
 
 std::vector<Sample> KMeans::get_initial_center() const
 {
-	return std::vector<Sample>();
+	std::vector<Sample> result;
+	srand((int)time(nullptr));
+	int index = rand() % _samples.size();
+	result.push_back(_samples.at(index));//第一个聚类中心随机选取
+	for (int i = 1; i < _cluster_count; i++) {//剩下的聚类中心优先选择与第一个中心最远的点
+
+	}
+	return result;
 }
 
 double KMeans::get_euclidian_distance(const Sample& lhs, const Sample& rhs)
 {
-	return 0.0;
+	double result = 0.0;
+
+	return result;
 }
 
 std::vector<Sample> KMeans::get_center() const

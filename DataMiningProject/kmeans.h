@@ -23,8 +23,8 @@ public:
 	//输出聚类结果
 
 private:
-	void normalize() const;
-	//对_sample进行归一化
+	void min_max_normalize();
+	//对_samples_data进行离差标准化
 
 	std::vector<Sample> get_initial_center() const;
 	//获取初始聚类中心，结果为初始聚类中心，数量为_cluster_count
