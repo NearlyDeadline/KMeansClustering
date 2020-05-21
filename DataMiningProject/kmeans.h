@@ -29,8 +29,11 @@ private:
 	std::vector<Sample> get_initial_center() const;
 	//获取初始聚类中心，结果为初始聚类中心，数量为_cluster_count
 
-	double get_euclidian_distance(const Sample& lhs, const Sample& rhs);
-	//传入两个样本点，计算并返回欧几里得距离
+	size_t get_next_initial_center(const std::vector<double>& distances) const;
+	//根据已有距离数据distance，使用轮盘法获得下一个初始聚类中心的下标
+
+	double get_euclidian_distance(const Sample& lhs, const Sample& rhs) const;
+	//传入两个样本点，计算并返回欧几里得距离，注意返回的是平方，需要自己开方
 
 	std::vector<Sample> get_center() const;
 	//迭代计算新的聚类中心，结果为新的聚类中心，数量为_cluster_count

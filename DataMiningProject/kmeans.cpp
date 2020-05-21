@@ -42,6 +42,7 @@ KMeans::KMeans(const std::string& data_path, const int& cluster_count)
 		sample.data.clear();
 	}
 	file.close();
+	min_max_normalize();
 }
 
 void KMeans::print_result() const
@@ -63,19 +64,52 @@ void KMeans::min_max_normalize()
 std::vector<Sample> KMeans::get_initial_center() const
 {
 	std::vector<Sample> result;
+	int _samples_count = _samples.size();
 	srand((int)time(nullptr));
-	int index = rand() % _samples.size();
+	int index = rand() % _samples_count;
 	result.push_back(_samples.at(index));//第一个聚类中心随机选取
-	for (int i = 1; i < _cluster_count; i++) {//剩下的聚类中心优先选择与第一个中心最远的点
-
+	vector<double> distances(DBL_MAX, _samples_count);//保存每个点与聚类中心的距离
+	for (int center_count = 1; center_count < _cluster_count; center_count++) {//剩下的聚类中心优先选择与之前中心最远的点。若有多个中心，则取最近的一个中心
+		for (int point_count = 0; point_count < _samples_count; point_count++) {
+			double distance = std::min(get_euclidian_distance(result.at(center_count), _samples.at(point_count)), distances[point_count]);
+		}
+		index = get_next_initial_center(distances);
+		result.push_back(_samples.at(index));
 	}
 	return result;
 }
 
-double KMeans::get_euclidian_distance(const Sample& lhs, const Sample& rhs)
+size_t KMeans::get_next_initial_center(const vector<double>& distances) const
+{
+	double sum = 0.0;
+	for (const double& value : distances)
+		sum += value;
+	vector<double> probabilities(0, distances.size());//计算每个点能被选为中心的概率
+	for (double& value : probabilities) {
+		value = value / sum;
+	}
+	double target = rand() / double(RAND_MAX);//0-1随机数
+	sum = 0.0;
+	size_t result = 0;
+	size_t length = probabilities.size();
+	for (; result < length; ++result) {
+		sum += probabilities[result];
+		if (sum > target) {
+			return result;
+		}
+	}
+	return distances.size() - 1;
+}
+
+double KMeans::get_euclidian_distance(const Sample& lhs, const Sample& rhs) const
 {
 	double result = 0.0;
-
+	if (lhs.data.size() == rhs.data.size()) {
+		for (vector<double>::const_iterator lhs_it = lhs.data.cbegin(), rhs_it = rhs.data.cbegin();
+			lhs_it != lhs.data.cend(); ++lhs_it, ++rhs_it) {
+			result += pow((*lhs_it) - (*rhs_it), 2);
+		}
+	}
 	return result;
 }
 
