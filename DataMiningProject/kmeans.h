@@ -38,8 +38,8 @@ private:
 	std::vector<Sample> get_center() const;
 	//迭代计算新的聚类中心，结果为新的聚类中心，数量为_cluster_count
 
-	bool is_finished(const double& delta) const;
-	//若新的聚类中心与旧的中心差距小于等于delta，则视为已收敛，停止迭代，否则继续迭代
+	bool is_finished(std::vector<Sample> prev, std::vector<Sample> post, const double& delta) const;
+	//若新的聚类中心post与旧的中心prev差距小于等于delta，则视为已收敛，停止迭代，否则继续迭代
 
 private:
 	std::vector<std::vector<double>> _samples_data;//样本数据中用于计算的部分，第一维为样本维度，第二维为样本点个数。便于分维度并行计算

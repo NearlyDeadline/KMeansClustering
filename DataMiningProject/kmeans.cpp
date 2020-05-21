@@ -115,10 +115,31 @@ double KMeans::get_euclidian_distance(const Sample& lhs, const Sample& rhs) cons
 
 std::vector<Sample> KMeans::get_center() const
 {
-	return std::vector<Sample>();
+	 vector<Sample> result(_cluster_count);
+	 size_t column_count = _samples.at(0).data.size();
+	 int index = 1;
+	 for (Sample& s : result) {//type类型值用来存储有多少个点以该聚类中心为最近中心
+		 s.data.resize(column_count);
+		 for (double& v : s.data)
+			 v = 0.0;
+		 s.cluster_index = index++;
+	 }
+	 for (const Sample& sample : _samples) {
+		 for (size_t i = 0; i < column_count; ++i) {
+			 result[sample.cluster_index - 1].data[i] += sample.data[i];
+		 }
+		 ++result[sample.cluster_index - 1].type;
+	 }
+	 for (Sample& s : result) {//取平均值作为中心
+		 for (double& value : s.data) {
+			 value = value / s.type;
+		 }
+		 s.type = 0;//清空type值
+	 }
+	 return result;
 }
 
-bool KMeans::is_finished(const double& delta) const
+bool KMeans::is_finished(vector<Sample> prev, vector<Sample> post, const double& delta) const
 {
 	return false;
 }
