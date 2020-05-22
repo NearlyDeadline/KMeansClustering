@@ -19,8 +19,8 @@ public:
 	KMeans(const std::string& data_path, const int& cluster_count);
 	//第一个参数为数据路径，第二个参数为想要聚类的簇数
 
-	int begin_clustering(const double& delta);
-	//开始聚类，delta为差距最大值，若各个中心变化值小于delta，则视为收敛
+	int begin_clustering(const double& delta/*, std::vector<std::vector<Sample>>& centers*/);
+	//开始聚类，delta为差距最大值，若各个中心变化值小于delta，则视为收敛。centers为可选的保存每次聚类中心的数据结构
 
 	std::vector<std::vector<size_t>> get_result() const;
 	//输出聚类结果

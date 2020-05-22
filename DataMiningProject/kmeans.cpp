@@ -44,12 +44,13 @@ KMeans::KMeans(const std::string& data_path, const int& cluster_count)
 	file.close();
 }
 
-int KMeans::begin_clustering(const double& delta)
+int KMeans::begin_clustering(const double& delta/*, vector<vector<Sample>>& centers*/)
 {
 	vector<size_t> initial_centers_index = get_initial_centers_index();
 	vector<Sample> post_center;
 	for (const size_t& index : initial_centers_index)
 		post_center.push_back(_samples.at(index));
+	//centers.push_back(post_center);
 	vector<double> distance(_cluster_count, 0);
 	vector<Sample> prev_center;
 	int count = 1;
@@ -66,6 +67,7 @@ int KMeans::begin_clustering(const double& delta)
 		}
 		prev_center = post_center;
 		post_center = get_center();
+		//centers.push_back(post_center);
 		count++;
 	} while (!is_finished(prev_center, post_center, delta));
 	return count;
